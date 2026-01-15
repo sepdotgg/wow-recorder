@@ -1,5 +1,9 @@
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
-import { ObsProperty, SceneItemPosition, SourceDimensions } from 'noobs';
+// TODO: noobs disabled for Linux port
+// import { ObsProperty, SceneItemPosition, SourceDimensions } from 'noobs';
+type ObsProperty = any;
+type SceneItemPosition = any;
+type SourceDimensions = any;
 import { AudioSourceType, RendererVideo, SceneItem } from './types';
 import { TChatMessage } from 'types/api';
 

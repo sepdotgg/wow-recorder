@@ -11,11 +11,13 @@
     "link-modules": "node -r ts-node/register ../../.erb/scripts/link-modules.ts",
     "postinstall": "npm run electron-rebuild && npm run link-modules"
   },
+  "//": "TODO: Port noobs",
+  "//": "noobs^0.0.181",
   "dependencies": {
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "@ffprobe-installer/ffprobe": "^2.1.2",
     "atomic-queue": "^5.0.4",
-    "noobs": "^0.0.181",
+    
     "uiohook-napi": "^1.5.2"
   },
   "license": "MIT"

@@ -81,9 +81,27 @@ export default class Poller extends EventEmitter {
     this.stop();
     console.info('[Poller] Start process poller');
 
-    this.child = spawn(this.binary);
-    this.child.stdout.on('data', this.handleStdout);
-    this.child.stderr.on('data', this.handleStderr);
+    // TODO: Ignore poller crashes for linux port
+    try {
+      this.child = spawn(this.binary);
+      this.child.stdout.on('data', this.handleStdout);
+      this.child.stderr.on('data', this.handleStderr);
+
+      // TODO: BEGIN
+      
+      // Handle process spawn errors (e.g., binary not found on Linux)
+      this.child.on('error', (error) => {
+        console.error(' /////// TODO [Poller] Failed to start process poller:', error.message);
+        console.warn(' /////// TODO [Poller] Process detection disabled - WoW detection will not work');
+        this.child = undefined;
+      });
+    } catch (error) {
+      console.error(' /////// TODO [Poller] Failed to spawn process poller:', error);
+      console.warn(' /////// TODO [Poller] Process detection disabled - WoW detection will not work');
+      this.child = undefined;
+    }
+
+    // TODO: END
   }
 
   /**

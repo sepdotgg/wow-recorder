@@ -1,7 +1,11 @@
 import ElectronStore from 'electron-store';
 import { Channels } from 'main/preload';
 import { AudioSourceType, RendererVideo, SceneItem } from 'main/types';
-import { ObsProperty, SceneItemPosition, SourceDimensions } from 'noobs';
+// TODO: noobs disabled for Linux port
+// import { ObsProperty, SceneItemPosition, SourceDimensions } from 'noobs';
+type ObsProperty = any;
+type SceneItemPosition = any;
+type SourceDimensions = any;
 import { TChatMessageWithId } from 'types/api';
 
 declare global {

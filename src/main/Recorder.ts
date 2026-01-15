@@ -47,12 +47,18 @@ import {
   getObsVideoConfig,
   getOverlayConfig,
 } from '../utils/configUtils';
-import noobs, {
-  ObsData,
-  SceneItemPosition,
-  Signal,
-  SourceDimensions,
-} from 'noobs';
+// TODO: noobs disabled for Linux port
+// import noobs, {
+//   ObsData,
+//   SceneItemPosition,
+//   Signal,
+//   SourceDimensions,
+// } from 'noobs';
+const noobs = null as any;
+type ObsData = any;
+type SceneItemPosition = any;
+type Signal = any;
+type SourceDimensions = any;
 import { getNativeWindowHandle, send } from './main';
 import { ipcMain } from 'electron';
 import Poller from 'utils/Poller';
@@ -501,6 +507,12 @@ export default class Recorder extends EventEmitter {
    * user to have setup their config for, which is why it's split out.
    */
   public async configureBase(config: BaseConfig, startup: boolean) {
+    // TODO: noobs disabled for Linux port
+    if (!this.obsInitialized) {
+      console.warn('/////// TODO [Recorder] configureBase skipped (OBS not initialized)');
+      return;
+    }
+
     const { obsFPS, obsRecEncoder, obsQuality, obsOutputResolution, obsPath } =
       config;
 
@@ -597,6 +609,12 @@ export default class Recorder extends EventEmitter {
    * Configures the video source in OBS.
    */
   public configureVideoSources(config: ObsVideoConfig) {
+    // TODO: noobs disabled for Linux port
+    if (!this.obsInitialized) {
+      console.warn('/////// TODO [Recorder] configureVideoSources skipped (OBS not initialized)');
+      return;
+    }
+
     const { obsCaptureMode } = config;
     this.clearFindWindowInterval();
 
@@ -712,6 +730,12 @@ export default class Recorder extends EventEmitter {
    * so it can be called externally when WoW is opened.
    */
   public configureAudioSources(config: ObsAudioConfig) {
+    // TODO: noobs disabled for Linux port
+    if (!this.obsInitialized) {
+      console.warn('/////// TODO [Recorder] configureAudioSources skipped (OBS not initialized)');
+      return;
+    }
+
     this.removeAudioSources();
     console.info('[Recorder] Configure audio sources');
 
@@ -855,7 +879,9 @@ export default class Recorder extends EventEmitter {
       return;
     }
 
-    noobs.Shutdown();
+    // TODO: noobs disabled for Linux port
+    console.warn('/////// TODO [Recorder] OBS shutdown skipped (noobs disabled for Linux port)');
+    // noobs.Shutdown();
     this.obsInitialized = false;
     console.info('[Recorder] OBS shut down successfully');
   }
@@ -1079,6 +1105,12 @@ export default class Recorder extends EventEmitter {
    * Initialize OBS, should be called once only.
    */
   public initializeObs() {
+    // TODO: noobs disabled for Linux port
+    console.warn('/////// TODO [Recorder] OBS initialization skipped (noobs disabled for Linux port)');
+    this.obsInitialized = false;
+    return;
+
+    /* TODO: Original code - will be restored after Linux port
     console.info('[Recorder] Initializing OBS');
     const cb = this.handleSignal.bind(this);
 
@@ -1109,6 +1141,7 @@ export default class Recorder extends EventEmitter {
 
     this.obsInitialized = true;
     console.info('[Recorder] OBS initialized successfully');
+    */
   }
 
   /**
@@ -1334,6 +1367,12 @@ export default class Recorder extends EventEmitter {
    * Configure the chat overlay image source.
    */
   public async configureOverlayImageSource(config: ObsOverlayConfig) {
+    // TODO: noobs disabled for Linux port
+    if (!this.obsInitialized) {
+      console.warn('/////// TODO [Recorder] configureOverlayImageSource skipped (OBS not initialized)');
+      return;
+    }
+
     const { chatOverlayEnabled } = config;
     console.info('[Recorder] Configure image source for chat overlay');
 
