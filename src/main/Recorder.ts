@@ -40,6 +40,9 @@ import {
   SceneItem,
   FileSortDirection,
 } from './types';
+// TODO: [linux-port]
+import { getOBSAudioSourceType } from './obsAudioSourceTypes';
+// TODO: [linux-port] END
 import ConfigService from '../config/ConfigService';
 import { obsResolutions } from './constants';
 import {
@@ -47,18 +50,14 @@ import {
   getObsVideoConfig,
   getOverlayConfig,
 } from '../utils/configUtils';
-// TODO: noobs disabled for Linux port
-// import noobs, {
-//   ObsData,
-//   SceneItemPosition,
-//   Signal,
-//   SourceDimensions,
-// } from 'noobs';
-const noobs = null as any;
-type ObsData = any;
-type SceneItemPosition = any;
-type Signal = any;
-type SourceDimensions = any;
+
+import noobs, {
+  ObsData,
+  SceneItemPosition,
+  Signal,
+  SourceDimensions,
+} from 'noobs';
+
 import { getNativeWindowHandle, send } from './main';
 import { ipcMain } from 'electron';
 import Poller from 'utils/Poller';
@@ -241,7 +240,7 @@ export default class Recorder extends EventEmitter {
      * Callback to attach the audio devices. This is called when the user
      * opens the audio settings so that the volmeter bars can be populated.
      */
-    ipcMain.handle('audioSettingsOpen', () => {
+    ipcMain.handle('audioSettingsOpen', async () => {
       console.info('[Manager] Audio settings were opened');
       noobs.SetVolmeterEnabled(true);
 
@@ -309,8 +308,11 @@ export default class Recorder extends EventEmitter {
     ipcMain.handle(
       'createAudioSource',
       (event, id: string, type: AudioSourceType) => {
-        console.info('[Manager] Creating audio source', id, 'of type', type);
-        const name = noobs.CreateSource(id, type);
+        // TODO: [linux-port] support platform audio types
+        const obsType = getOBSAudioSourceType(type);
+        console.info('[Manager] Creating audio source', id, 'of type', obsType);
+        const name = noobs.CreateSource(id, obsType);
+        // TODO: [linux-port] END
         console.info('[Manager] Created audio source', name);
         noobs.AddSourceToScene(name);
         return name;
@@ -508,10 +510,10 @@ export default class Recorder extends EventEmitter {
    */
   public async configureBase(config: BaseConfig, startup: boolean) {
     // TODO: noobs disabled for Linux port
-    if (!this.obsInitialized) {
-      console.warn('/////// TODO [Recorder] configureBase skipped (OBS not initialized)');
-      return;
-    }
+    // if (!this.obsInitialized) {
+    //   console.warn('/////// TODO [Recorder] configureBase skipped (OBS not initialized)');
+    //   return;
+    // }
 
     const { obsFPS, obsRecEncoder, obsQuality, obsOutputResolution, obsPath } =
       config;
@@ -631,7 +633,13 @@ export default class Recorder extends EventEmitter {
     }
 
     if (obsCaptureMode === 'monitor_capture') {
-      this.configureMonitorCaptureSource(config);
+      // TODO: [linux-port] handle these in both window and monitor -- pipewire does not distinguish, disable game
+      if (process.platform === 'linux') {
+        this.configurePipeWireCaptureSource(config);
+      } else {
+        this.configureMonitorCaptureSource(config);
+      }
+      // TODO: [linux-port] END
     } else if (obsCaptureMode === 'game_capture') {
       this.configureGameCaptureSource(config);
     } else if (obsCaptureMode === 'window_capture') {
@@ -729,14 +737,18 @@ export default class Recorder extends EventEmitter {
    * Add the configured audio sources to the OBS scene. This is public
    * so it can be called externally when WoW is opened.
    */
+  // TODO: [linux-port] Made async to allow delay for PulseAudio cleanup
   public configureAudioSources(config: ObsAudioConfig) {
-    // TODO: noobs disabled for Linux port
+    // TODO: [linux-port] END
+    // TODO: [linux-port] noobs disabled for Linux port
     if (!this.obsInitialized) {
       console.warn('/////// TODO [Recorder] configureAudioSources skipped (OBS not initialized)');
       return;
     }
+    // TODO: [linux-port] END
 
     this.removeAudioSources();
+
     console.info('[Recorder] Configure audio sources');
 
     // Can't release all the listeners here as we now use
@@ -750,8 +762,12 @@ export default class Recorder extends EventEmitter {
     noobs.SetAudioSuppression(config.obsAudioSuppression);
 
     config.audioSources.forEach((src) => {
-      console.info('[Recorder] Create audio source', src.id);
-      const name = noobs.CreateSource(src.id, src.type);
+      // TODO: [linux-port] pltaform agnostic source type
+      const obsType = getOBSAudioSourceType(src.type);
+
+      console.info('[Recorder] Create audio source', src.id, 'for type', obsType);
+      const name = noobs.CreateSource(src.id, obsType);
+      // TODO: [linux-port]
       const settings = noobs.GetSourceSettings(name);
 
       if (src.type === AudioSourceType.PROCESS && src.device) {
@@ -879,9 +895,7 @@ export default class Recorder extends EventEmitter {
       return;
     }
 
-    // TODO: noobs disabled for Linux port
-    console.warn('/////// TODO [Recorder] OBS shutdown skipped (noobs disabled for Linux port)');
-    // noobs.Shutdown();
+    noobs.Shutdown();
     this.obsInitialized = false;
     console.info('[Recorder] OBS shut down successfully');
   }
@@ -1105,12 +1119,6 @@ export default class Recorder extends EventEmitter {
    * Initialize OBS, should be called once only.
    */
   public initializeObs() {
-    // TODO: noobs disabled for Linux port
-    console.warn('/////// TODO [Recorder] OBS initialization skipped (noobs disabled for Linux port)');
-    this.obsInitialized = false;
-    return;
-
-    /* TODO: Original code - will be restored after Linux port
     console.info('[Recorder] Initializing OBS');
     const cb = this.handleSignal.bind(this);
 
@@ -1126,8 +1134,18 @@ export default class Recorder extends EventEmitter {
     noobsPath = fixPathWhenPackaged(noobsPath);
 
     console.info('[Recorder] Noobs path:', noobsPath);
-    console.info('[Recorder] Log path:', logPath);
+    console.info('[Recorder] Log path', logPath);
+
+    // TODO: [linux-port] Path weirdness on linux
+    if (process.platform === 'linux') {
+      const noobsBinPath = path.join(__dirname, '../../node_modules/noobs/dist/bin');
+      console.info('[Recorder] Setting  Noobs bin path', noobsBinPath);
+      process.env.PATH = `${noobsBinPath}:${process.env.PATH}`;
+    }
+    
     noobs.Init(noobsPath, logPath, cb);
+    console.log('noobs.Init completed successfully'); 
+    // TODO: [linux-port] END
     noobs.SetBuffering(true);
 
     const hwnd = getNativeWindowHandle();
@@ -1141,7 +1159,6 @@ export default class Recorder extends EventEmitter {
 
     this.obsInitialized = true;
     console.info('[Recorder] OBS initialized successfully');
-    */
   }
 
   /**
@@ -1165,6 +1182,11 @@ export default class Recorder extends EventEmitter {
       // clear this is the dimensions NOT the scale. Users cannot trigger this.
       send('redrawPreview');
       send('initCropSliders');
+
+      // TODO: [linux-port] Save PipeWire restore token after portal selection completes
+      if (this.captureMode === CaptureMode.PIPEWIRE && signal.id === this.captureSource) {
+        this.savePipewireRestoreToken();
+      }
       return;
     }
 
@@ -1281,8 +1303,83 @@ export default class Recorder extends EventEmitter {
     noobs.SetSourcePos(this.captureSource, position);
   }
 
+  // TODO: [linux-port] save pipewire token, this needs to be called before going to scene
+  /**
+   * Capture and save the PipeWire restore token after portal selection.
+   * Call this after the user has completed the portal dialog.
+   */
+  private savePipewireRestoreToken(): ObsData | undefined {
+    if (!this.captureSource || this.captureMode !== CaptureMode.PIPEWIRE) {
+      console.warn('[Recorder] Not a PipeWire source, skipping token save');
+      return undefined;
+    }
+
+    const settings = noobs.GetSourceSettings(this.captureSource);
+    const restoreToken = settings['RestoreToken'];
+
+    if (restoreToken && typeof restoreToken === 'string') {
+      console.info('[Recorder] Saving PipeWire restore token:', restoreToken);
+      this.cfg.set('pipewireRestoreToken', restoreToken);
+    } else {
+      console.warn('[Recorder] No restore token available to save');
+    }
+    return settings;
+  } 
+
+  /**
+   * Creates a PipeWire screen capture source (Linux).
+   */
+  private configurePipeWireCaptureSource(config: ObsVideoConfig) {
+    console.info('[Recorder] Configuring OBS for PipeWire Screen Capture');
+
+    const {
+      videoSourceXPosition,
+      videoSourceYPosition,
+      videoSourceScale,
+      captureCursor,
+      pipewireRestoreToken,
+    } = config;
+
+    console.info('[Recorder] Applying PipeWire settings with restore token:', 
+    pipewireRestoreToken ? 'present' : 'none');
+    console.info('[Recorder] Using pipewire restore token: ', pipewireRestoreToken);
+
+    // if there's a pipewire token present, use it
+    const initialSettings = {
+      // https://github.com/obsproject/obs-studio/blob/c11253bb088bd501b12998fb37fdcd6bf4743c35/plugins/linux-pipewire/screencast-portal.c#L518-L519
+      ShowCursor: captureCursor,
+      RestoreToken: pipewireRestoreToken
+    }
+
+    this.captureMode = CaptureMode.PIPEWIRE;
+    this.captureSource = noobs.CreateSource(
+      VideoSourceName.PIPEWIRE,
+      'pipewire-window-capture-source', // TODO: [linux-port] monitor/window -- remove game in linux
+      initialSettings,
+    );
+
+    // this will give us back a new restore token, which must be saved
+    const settings = this.savePipewireRestoreToken();
+
+    const position: SceneItemPosition = {
+      x: videoSourceXPosition,
+      y: videoSourceYPosition,
+      scaleX: videoSourceScale,
+      scaleY: videoSourceScale,
+      cropLeft: 0,
+      cropRight: 0,
+      cropTop: 0,
+      cropBottom: 0,
+    };
+
+    noobs.SetSourceSettings(this.captureSource, settings ?? initialSettings);
+    noobs.AddSourceToScene(this.captureSource);
+    noobs.SetSourcePos(this.captureSource, position);
+  }
+
   /**
    * Creates a monitor capture source.
+   * TODO: [linux-port] - Support pipewire here
    */
   private configureMonitorCaptureSource(config: ObsVideoConfig) {
     console.info('[Recorder] Configuring OBS for Monitor Capture');

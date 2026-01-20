@@ -283,10 +283,11 @@ interface IDevice {
   description: string;
 }
 
+// TODO: [linux-port] platform audio source types
 enum AudioSourceType {
-  OUTPUT = 'wasapi_output_capture',
-  INPUT = 'wasapi_input_capture',
-  PROCESS = 'wasapi_process_output_capture',
+  OUTPUT = 'output',
+  INPUT = 'input',
+  PROCESS = 'process',
 }
 
 type AudioSource = {
@@ -392,6 +393,9 @@ type ObsVideoConfig = {
   obsCaptureMode: string;
   monitorIndex: number;
   captureCursor: boolean;
+  // TODO: [linux-port] Linux only
+  pipewireRestoreToken: string | null;
+  // TODO: [linux-port] END
   forceSdr: boolean;
   videoSourceScale: number;
   videoSourceXPosition: number;
@@ -603,6 +607,7 @@ enum VideoSourceName {
   GAME = 'WCR Game Capture',
   MONITOR = 'WCR Monitor Capture',
   OVERLAY = 'WCR Chat Overlay',
+  PIPEWIRE = 'WCR Pipewire Capture',
 }
 
 enum AudioSourcePrefix {

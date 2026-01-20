@@ -31,12 +31,37 @@ export default class Poller extends EventEmitter {
    */
   private child: ChildProcessWithoutNullStreams | undefined;
 
+  // TODO: [linux-port] rust-ps binary path for each platform
   /**
-   * Singleton instance.
+   * Get the appropriate binary name based on platform and architecture.
+   */
+  private getBinaryName(): string {
+    const platform = process.platform;
+    const arch = process.arch;
+
+    if (platform === 'win32') {
+      return 'rust-ps.exe';
+    }
+
+    if (platform === 'linux') {
+      if (arch === 'arm64') {
+        return 'rust-ps-linux-arm64';
+      }
+      return 'rust-ps-linux';
+    }
+
+    // Fallback
+    return 'rust-ps.exe';
+  }
+  
+  /**
+   * Path to the platform-specific binary.
    */
   private binary = app.isPackaged
-    ? path.join(process.resourcesPath, 'binaries', 'rust-ps.exe')
-    : path.join(__dirname, '../../binaries', 'rust-ps.exe');
+    ? path.join(process.resourcesPath, 'binaries', this.getBinaryName())
+    : path.join(__dirname, '../../binaries', this.getBinaryName());
+
+  // TODO: [linux-port] END
 
   /**
    * Create or get the singleton.
