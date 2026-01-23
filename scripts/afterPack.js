@@ -21,15 +21,24 @@ exports.default = async function(context) {
   // Create the wrapper script
   const wrapperContent = `#!/bin/bash
 SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
-export LD_LIBRARY_PATH="$SCRIPT_DIR/resources/app.asar.unpacked/node_modules/noobs/dist/bin:\$LD_LIBRARY_PATH"
-# to find obs-ffmpeg-mux
-export PATH="$SCRIPT_DIR/resources/app.asar.unpacked/node_modules/noobs/dist/bin:$PATH"
 
-# Preload system libavcodec to override Electron's limited FFmpeg (missing AAC encoder)
+NOOBS_BIN="$SCRIPT_DIR/resources/app.asar.unpacked/node_modules/noobs/dist/bin"
+export LD_LIBRARY_PATH="$NOOBS_BIN:$LD_LIBRARY_PATH"
+export PATH="$NOOBS_BIN:$PATH"
+
+# Force libobs load order (critical)
+LIB_OBS="$NOOBS_BIN/libobs.so.30"
+
+# For AAC
 AVCODEC_PATH=\$(ldconfig -p | grep 'libavcodec\\.so\\.[0-9]' | sort -t. -k3 -n | tail -1 | awk '{print \$NF}')
-if [ -n "\$AVCODEC_PATH" ]; then
-  export LD_PRELOAD="\$AVCODEC_PATH"
-fi
+# For PNG
+AFFORMAT_PATH=\$(ldconfig -p | grep 'libavformat\\.so\\.[0-9]' | sort -t. -k3 -n | tail -1 | awk '{print \$NF}')
+
+
+// TODO: [linux-port] We need to package _all_ of ffmpeg's av* libraries and load them via LD_LIBRARY_PATH.
+//                    Putting it in preload is a stopgap to enable dev
+//                    libobs still needs to be preloaded to prevent electron's ffmpeg from loading the wrong codec libs
+export LD_PRELOAD="$LIB_OBS $AVCODEC_PATH $AVFORMAT_PATH"
 
 exec "$SCRIPT_DIR/${executableName}-bin" "$@"
 `;

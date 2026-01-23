@@ -24,6 +24,7 @@ enum Phrase {
   ObsForceMonoDescription,
   ObsQualityDescription,
   ObsCaptureModeDescription,
+  ObsCaptureModeDescriptionLinux,
   ObsRecEncoderDescription,
   RecordRetailDescription,
   RecordClassicDescription,
@@ -324,6 +325,9 @@ enum Phrase {
   ErrorCustomOverlayNotAllowed,
   ErrorNoCustomImage,
   ErrorCustomImageFileType,
+  // TODO: [linux-support] JPG is supported now that we use stb_image
+  ErrorCustomImageFileTypeLinux,
+  // TODO: [linux-support] END
   ErrorCustomImageNotExist,
   InvalidRetailLogPath,
   InvalidClassicLogPath,
@@ -498,6 +502,7 @@ enum Phrase {
   SelectOptions,
   SelectLanguage,
   ChatDeleteMessageTooltip,
+  ReselectPipewireSourceButtonText,
 }
 
 enum Language {

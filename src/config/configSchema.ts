@@ -226,6 +226,7 @@ export const configSchema = {
   },
   obsCaptureMode: {
     description: Phrase.ObsCaptureModeDescription,
+    descriptionLinux: Phrase.ObsCaptureModeDescriptionLinux,
     type: 'string',
     default: 'window_capture',
   },
