@@ -289,6 +289,7 @@ enum AudioSourceType {
   INPUT = 'input',
   PROCESS = 'process',
 }
+// TODO: [linux-port] END
 
 type AudioSource = {
   id: string; // The source name
@@ -336,6 +337,9 @@ type AppState = {
   diskStatus: DiskStatus;
   chatOpen: boolean;
   preferredViewpoint: string;
+  // TODO: [linux-port] add platform to AppState
+  platform: NodeJS.Platform;
+  // TODO: [linux-port] END
 };
 
 type CloudState = {
@@ -607,7 +611,9 @@ enum VideoSourceName {
   GAME = 'WCR Game Capture',
   MONITOR = 'WCR Monitor Capture',
   OVERLAY = 'WCR Chat Overlay',
+  // TODO: [linux-port]
   PIPEWIRE = 'WCR Pipewire Capture',
+  // TODO: [linux-port] END
 }
 
 enum AudioSourcePrefix {
@@ -625,6 +631,13 @@ enum SoundAlerts {
   MANUAL_RECORDING_ERROR = 'manual-recording-error',
   MANUAL_RECORDING_START = 'manual-recording-start',
   MANUAL_RECORDING_STOP = 'manual-recording-stop',
+}
+
+enum ObsOrderMovement {
+  OBS_ORDER_MOVE_UP = 0,
+  OBS_ORDER_MOVE_DOWN = 1,
+  OBS_ORDER_MOVE_TOP = 2,
+  OBS_ORDER_MOVE_BOTTOM = 3,
 }
 
 export {
@@ -688,4 +701,5 @@ export {
   WowProcessEvent,
   SoundAlerts,
   CloudState,
+  ObsOrderMovement,
 };

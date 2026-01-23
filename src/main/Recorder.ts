@@ -39,6 +39,7 @@ import {
   VideoSourceName,
   SceneItem,
   FileSortDirection,
+  ObsOrderMovement,
 } from './types';
 // TODO: [linux-port]
 import { getOBSAudioSourceType } from './obsAudioSourceTypes';
@@ -59,11 +60,12 @@ import noobs, {
 } from 'noobs';
 
 import { getNativeWindowHandle, send } from './main';
-import { ipcMain } from 'electron';
+import { app, ipcMain } from 'electron';
 import Poller from 'utils/Poller';
 import AsyncQueue from 'utils/AsyncQueue';
 import assert from 'assert';
 import { isHighRes } from 'renderer/rendererutils';
+import { platform } from 'os';
 
 const devMode = process.env.NODE_ENV === 'development';
 
@@ -236,6 +238,17 @@ export default class Recorder extends EventEmitter {
       this.configureOverlayImageSource(overlayCfg);
     });
 
+    // TODO: [linux-port] add reselectPipewireSource listener
+    ipcMain.on('reselectPipewireSource', () => {
+      console.info('[Recorder] Reselecting Pipewire source');
+      // Invalidate the restore token
+      this.cfg.set('pipewireRestoreToken', null);
+      // Re-trigger video configuration
+      const cfg = getObsVideoConfig(this.cfg);
+      this.configureVideoSources(cfg);
+    });
+    // TODO: [linux-port] END
+
     /**
      * Callback to attach the audio devices. This is called when the user
      * opens the audio settings so that the volmeter bars can be populated.
@@ -312,6 +325,14 @@ export default class Recorder extends EventEmitter {
         const obsType = getOBSAudioSourceType(type);
         console.info('[Manager] Creating audio source', id, 'of type', obsType);
         const name = noobs.CreateSource(id, obsType);
+
+        // set MatchPriority to 1 (app name first) for Linux Pipewire app capture
+        if (process.platform === 'linux' && type === AudioSourceType.PROCESS) {
+          const settings = noobs.GetSourceSettings(name);
+          settings['CaptureMode'] = 0; // CAPTURE_MODE_SINGLE
+          settings['MatchPriorty'] = 1; // MATCH_PRIORITY_APP_NAME
+          noobs.SetSourceSettings(name, settings);
+        }
         // TODO: [linux-port] END
         console.info('[Manager] Created audio source', name);
         noobs.AddSourceToScene(name);
@@ -349,8 +370,17 @@ export default class Recorder extends EventEmitter {
         value,
       );
       const settings = noobs.GetSourceSettings(id);
-      settings['window'] = value;
-      settings['priority'] = 2; // Executable matching
+
+      // TODO: [linux-port] set Pipewire audio settings
+      if (process.platform === 'linux') {
+        settings['TargetName'] = value;
+        settings['CaptureMode'] = 0; // CAPTURE_MODE_SINGLE
+        settings['MatchPriorty'] = 1; // MATCH_PRIORITY_APP_NAME
+      } else {
+        settings['window'] = value;
+        settings['priority'] = 2; // Executable matching
+      }
+      // TODO: [linux-port] END
       noobs.SetSourceSettings(id, settings);
     });
 
@@ -611,12 +641,6 @@ export default class Recorder extends EventEmitter {
    * Configures the video source in OBS.
    */
   public configureVideoSources(config: ObsVideoConfig) {
-    // TODO: noobs disabled for Linux port
-    if (!this.obsInitialized) {
-      console.warn('/////// TODO [Recorder] configureVideoSources skipped (OBS not initialized)');
-      return;
-    }
-
     const { obsCaptureMode } = config;
     this.clearFindWindowInterval();
 
@@ -633,17 +657,34 @@ export default class Recorder extends EventEmitter {
     }
 
     if (obsCaptureMode === 'monitor_capture') {
-      // TODO: [linux-port] handle these in both window and monitor -- pipewire does not distinguish, disable game
-      if (process.platform === 'linux') {
-        this.configurePipeWireCaptureSource(config);
-      } else {
+        // TODO: [linux-port] shouldn't get here, but will crash if we do
+        if (process.platform === 'linux') {
+          console.warn('[Recorder] Attempted to select monitor capture on Linux');
+          return;
+        }
+        // TODO: [linux-port] END
         this.configureMonitorCaptureSource(config);
-      }
-      // TODO: [linux-port] END
     } else if (obsCaptureMode === 'game_capture') {
+      // TODO: [linux-port] shouldn't get here, but will crash if we do
+      if (process.platform === 'linux') {
+          console.warn('[Recorder] Attempted to select game capture on Linux');
+          return;
+        }
+      // TODO: [linux-port] END
       this.configureGameCaptureSource(config);
     } else if (obsCaptureMode === 'window_capture') {
-      this.configureWindowCaptureSource(config);
+      // TODO: [linux-port] pipewire does not distinguish between window/screen.
+      //       You capture the thing you select in the portal.
+      if (process.platform === 'linux') {
+        setTimeout(() => {
+          // pipewire will trigger the portal again if the same restore token is used too
+          // soon after a previous session ends
+          this.configurePipeWireCaptureSource(config);
+        }, 100);
+      } else {
+        this.configureWindowCaptureSource(config);
+      }
+      // TODO: [linux-port] END
     } else {
       console.error('[Recorder] Unrecognised capture mode', obsCaptureMode);
       throw new Error('Unrecognised capture mode');
@@ -684,6 +725,8 @@ export default class Recorder extends EventEmitter {
       file: chatOverlayOwnImagePath,
     });
 
+    console.info('[Recorder] Setting overlay file path:', chatOverlayOwnImagePath);
+
     noobs.AddSourceToScene(this.overlaySource);
 
     noobs.SetSourcePos(this.overlaySource, {
@@ -696,6 +739,10 @@ export default class Recorder extends EventEmitter {
       cropTop: config.chatOverlayCropY,
       cropBottom: config.chatOverlayCropY,
     });
+
+    // TODO: [linux-port] chat overlay always on top
+    noobs.SetSceneItemOrder(this.overlaySource, ObsOrderMovement.OBS_ORDER_MOVE_TOP);
+    // TODO: [linux-port] END
   }
 
   /**
@@ -731,6 +778,10 @@ export default class Recorder extends EventEmitter {
       cropTop: config.chatOverlayCropY,
       cropBottom: config.chatOverlayCropY,
     });
+
+    // TODO: [linux-port] chat overlay always on top
+    noobs.SetSceneItemOrder(this.overlaySource, ObsOrderMovement.OBS_ORDER_MOVE_TOP);
+    // TODO: [linux-port] END
   }
 
   /**
@@ -771,8 +822,12 @@ export default class Recorder extends EventEmitter {
       const settings = noobs.GetSourceSettings(name);
 
       if (src.type === AudioSourceType.PROCESS && src.device) {
-        settings['window'] = src.device;
-        settings['priority'] = 2; // Executable matching
+        if (process.platform === 'linux') {
+          settings['TargetName'] = src.device;
+          settings['priority'] = 2; // Executable matching
+        } else {
+          settings['window'] = src.device;
+        }
         noobs.SetSourceSettings(name, settings);
       } else if (src.type !== AudioSourceType.PROCESS) {
         const properties = noobs.GetSourceProperties(name);
@@ -1122,9 +1177,21 @@ export default class Recorder extends EventEmitter {
     console.info('[Recorder] Initializing OBS');
     const cb = this.handleSignal.bind(this);
 
+    // TODO: [linux-port] get a writable log directory inside the package
     let logPath = devMode
       ? path.resolve(__dirname, './logs')
-      : path.resolve(__dirname, '../../dist/main/logs');
+      
+      : app.isPackaged 
+        ? path.join(app.getPath('userData'), 'logs') 
+        : path.resolve(__dirname, '../../dist/main/logs');
+
+    console.log('LOG_PATH', logPath);
+
+    // Ensure log directory exists
+    if (!fs.existsSync(logPath)) {
+      fs.mkdirSync(logPath, { recursive: true });
+    }
+    // TODO: [linux-port] END
 
     let noobsPath = devMode
       ? path.resolve(__dirname, '../../release/app/node_modules/noobs/dist')
@@ -1342,7 +1409,6 @@ export default class Recorder extends EventEmitter {
 
     console.info('[Recorder] Applying PipeWire settings with restore token:', 
     pipewireRestoreToken ? 'present' : 'none');
-    console.info('[Recorder] Using pipewire restore token: ', pipewireRestoreToken);
 
     // if there's a pipewire token present, use it
     const initialSettings = {
@@ -1354,7 +1420,7 @@ export default class Recorder extends EventEmitter {
     this.captureMode = CaptureMode.PIPEWIRE;
     this.captureSource = noobs.CreateSource(
       VideoSourceName.PIPEWIRE,
-      'pipewire-window-capture-source', // TODO: [linux-port] monitor/window -- remove game in linux
+      'pipewire-screen-capture-source', // TODO: [linux-port] monitor/window -- remove game in linux
       initialSettings,
     );
 
@@ -1375,6 +1441,9 @@ export default class Recorder extends EventEmitter {
     noobs.SetSourceSettings(this.captureSource, settings ?? initialSettings);
     noobs.AddSourceToScene(this.captureSource);
     noobs.SetSourcePos(this.captureSource, position);
+    // TODO: [linux-port] video always on bottom
+    noobs.SetSceneItemOrder(this.captureSource, ObsOrderMovement.OBS_ORDER_MOVE_BOTTOM);
+    // TODO: [linux-port] END
   }
 
   /**

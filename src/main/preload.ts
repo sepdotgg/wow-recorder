@@ -1,9 +1,5 @@
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
-// TODO: noobs disabled for Linux port
-// import { ObsProperty, SceneItemPosition, SourceDimensions } from 'noobs';
-type ObsProperty = any;
-type SceneItemPosition = any;
-type SourceDimensions = any;
+import { ObsProperty, SceneItemPosition, SourceDimensions } from 'noobs';
 import { AudioSourceType, RendererVideo, SceneItem } from './types';
 import { TChatMessage } from 'types/api';
 
@@ -53,7 +49,12 @@ export type Channels =
   | 'reconfigureOverlay'
   | 'reconfigureCloud'
   | 'getSensibleEncoderDefault'
-  | 'refreshCloudGuilds';
+  // TODO: [linux-port] add getPlatform channel
+  | 'getPlatform'
+  // TODO: [linux-port] END
+  | 'refreshCloudGuilds'
+  // TODO: [linux-port] add reselectPipewireSource channel
+  | 'reselectPipewireSource';
 
 contextBridge.exposeInMainWorld('electron', {
   ipcRenderer: {
@@ -203,9 +204,21 @@ contextBridge.exposeInMainWorld('electron', {
       return ipcRenderer.invoke('getSensibleEncoderDefault');
     },
 
+    // TODO: [linux-port] expose getPlatform (synchronous)
+    getPlatform(): NodeJS.Platform {
+      return ipcRenderer.sendSync('getPlatform', []);
+    },
+    // TODO: [linux-port] END
+
     refreshCloudGuilds() {
       ipcRenderer.send('refreshCloudGuilds');
     },
+
+    // TODO: [linux-port] add reselectPipewireSource method
+    reselectPipewireSource() {
+      ipcRenderer.send('reselectPipewireSource');
+    },
+    // TODO: [linux-port] END
 
     getOrCreateChatCorrelator(video: RendererVideo): Promise<string> {
       return ipcRenderer.invoke('getOrCreateChatCorrelator', video);
