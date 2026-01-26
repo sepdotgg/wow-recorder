@@ -202,6 +202,7 @@ const getBaseConfig = (cfg: ConfigService): BaseConfig => {
     recordEra: cfg.get<boolean>('recordEra'),
     eraLogPath: cfg.get<string>('eraLogPath'),
     retailPtrLogPath: cfg.get<string>('retailPtrLogPath'),
+    validateLogPaths: cfg.get<boolean>('validateLogPaths'),
   };
 };
 
@@ -277,6 +278,7 @@ const validateBaseConfig = async (config: BaseConfig) => {
     classicPtrLogPath,
     recordEra,
     eraLogPath,
+    validateLogPaths,
   } = config;
 
   if (!storagePath) {
@@ -345,12 +347,16 @@ const validateBaseConfig = async (config: BaseConfig) => {
   }
 
   if (recordRetail) {
-    const validFlavours = ['wow'];
-    const validPath =
-      validFlavours.includes(getWowFlavour(retailLogPath)) &&
-      path.basename(retailLogPath) === 'Logs';
+    const validRetailFlavours = ['wow'];
 
-    if (!validPath) {
+    const validFlavor = validateLogPaths
+      ? validRetailFlavours.includes(getWowFlavour(retailLogPath))
+      : true;
+
+    const validPath = path.basename(retailLogPath) === 'Logs';
+    const valid = validFlavor && validPath;
+
+    if (!valid) {
       console.error('[Util] Invalid retail log path', retailLogPath);
       const error = getLocaleError(Phrase.InvalidRetailLogPath);
       throw new Error(error);
@@ -358,12 +364,16 @@ const validateBaseConfig = async (config: BaseConfig) => {
   }
 
   if (recordRetailPtr) {
-    const validFlavours = ['wowxptr', 'wow_beta'];
-    const validPath =
-      validFlavours.includes(getWowFlavour(retailPtrLogPath)) &&
-      path.basename(retailPtrLogPath) === 'Logs';
+    const validRetailPtrFlavours = ['wowxptr', 'wow_beta'];
 
-    if (!validPath) {
+    const validFlavor = validateLogPaths
+      ? validRetailPtrFlavours.includes(getWowFlavour(retailPtrLogPath))
+      : true;
+
+    const validPath = path.basename(retailPtrLogPath) === 'Logs';
+    const valid = validFlavor && validPath;
+
+    if (!valid) {
       console.error('[Util] Invalid retail PTR log path', retailPtrLogPath);
       const error = getLocaleError(Phrase.InvalidRetailPtrLogPathText);
       throw new Error(error);
@@ -371,12 +381,16 @@ const validateBaseConfig = async (config: BaseConfig) => {
   }
 
   if (recordClassic) {
-    const validFlavours = ['wow_classic'];
-    const validPath =
-      validFlavours.includes(getWowFlavour(classicLogPath)) &&
-      path.basename(classicLogPath) === 'Logs';
+    const validClassicFlavours = ['wow_classic'];
 
-    if (!validPath) {
+    const validFlavour = validateLogPaths
+      ? validClassicFlavours.includes(getWowFlavour(classicLogPath))
+      : true;
+
+    const validPath = path.basename(classicLogPath) === 'Logs';
+    const valid = validFlavour && validPath;
+
+    if (!valid) {
       console.error('[Util] Invalid classic log path', classicLogPath);
       const error = getLocaleError(Phrase.InvalidClassicLogPath);
       throw new Error(error);
@@ -384,12 +398,15 @@ const validateBaseConfig = async (config: BaseConfig) => {
   }
 
   if (recordClassicPtr) {
-    const validFlavours = ['wow_classic_beta', 'wow_classic_ptr'];
-    const validPath =
-      validFlavours.includes(getWowFlavour(classicPtrLogPath)) &&
-      path.basename(classicPtrLogPath) === 'Logs';
+    const validClassicPtrFlavours = ['wow_classic_beta', 'wow_classic_ptr'];
+    const validFlavor = validateLogPaths
+      ? validClassicPtrFlavours.includes(getWowFlavour(classicPtrLogPath))
+      : true;
 
-    if (!validPath) {
+    const validPath = path.basename(classicPtrLogPath) === 'Logs';
+    const valid = validFlavor && validPath;
+
+    if (!valid) {
       console.error('[Util] Invalid classic PTR log path', classicPtrLogPath);
       const error = getLocaleError(Phrase.InvalidClassicPtrLogPath);
       throw new Error(error);
@@ -397,12 +414,16 @@ const validateBaseConfig = async (config: BaseConfig) => {
   }
 
   if (recordEra) {
-    const validFlavours = ['wow_classic_era', 'wow_classic_era_ptr'];
-    const validPath =
-      validFlavours.includes(getWowFlavour(eraLogPath)) &&
-      path.basename(eraLogPath) === 'Logs';
+    const validEraFlavours = ['wow_classic_era', 'wow_classic_era_ptr'];
 
-    if (!validPath) {
+    const validFlavour = validateLogPaths
+      ? validEraFlavours.includes(getWowFlavour(eraLogPath))
+      : true;
+
+    const validPath = path.basename(eraLogPath) === 'Logs';
+    const valid = validFlavour && validPath;
+
+    if (!valid) {
       console.error('[Util] Invalid era log path', eraLogPath);
       const error = getLocaleError(Phrase.InvalidEraLogPath);
       throw new Error(error);

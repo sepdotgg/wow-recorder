@@ -87,6 +87,8 @@ declare global {
         getChatMessages(correlator: string): Promise<TChatMessageWithId[]>;
         postChatMessage(correlator: string, message: string): void;
         deleteChatMessage(id: number): void;
+        toggleManualRecording(): void;
+        forceStopRecording(): void;
       };
     };
   }

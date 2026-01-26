@@ -100,6 +100,7 @@ export type ConfigurationSchema = {
   manualRecordUpload: boolean;
   firstTimeSetup: boolean;
   chatUserNameAgreed: string;
+  validateLogPaths: boolean;
 };
 
 export type ConfigurationSchemaKey = keyof ConfigurationSchema;
@@ -617,5 +618,10 @@ export const configSchema = {
     description: Phrase.Unknown, // Not actually exposed.
     type: 'string',
     default: '',
+  },
+  validateLogPaths: {
+    description: Phrase.ValidateLogPathsDescription,
+    type: 'boolean',
+    default: true,
   },
 };

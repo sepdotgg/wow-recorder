@@ -11,6 +11,7 @@ import {
   CloudStatus,
   DiskStatus,
   StorageFilter,
+  ActivityStatus,
 } from 'main/types';
 import Box from '@mui/material/Box';
 import { getLocalePhrase, Language } from 'localisation/translations';
@@ -49,6 +50,10 @@ const WarcraftRecorder = () => {
 
   const [recorderStatus, setRecorderStatus] = useState<RecStatus>(
     RecStatus.WaitingForWoW,
+  );
+
+  const [activityStatus, setActivityStatus] = useState<ActivityStatus | null>(
+    null,
   );
 
   const [savingStatus, setSavingStatus] = useState<SaveStatus>(
@@ -162,6 +167,10 @@ const WarcraftRecorder = () => {
     if (status === RecStatus.InvalidConfig || status === RecStatus.FatalError) {
       setError(err as string);
     }
+  };
+
+  const updateActivityStatus = (status: unknown) => {
+    setActivityStatus(status as ActivityStatus);
   };
 
   const updateSaveStatus = (status: unknown) => {
@@ -408,6 +417,7 @@ const WarcraftRecorder = () => {
 
   useEffect(() => {
     ipc.on('updateRecStatus', updateRecStatus);
+    ipc.on('updateActivityStatus', updateActivityStatus);
     ipc.on('updateSaveStatus', updateSaveStatus);
     ipc.on('updateMicStatus', updateMicStatus);
     ipc.on('updateErrorReport', updateErrorReports);
@@ -425,6 +435,7 @@ const WarcraftRecorder = () => {
 
     return () => {
       ipc.removeAllListeners('updateRecStatus');
+      ipc.removeAllListeners('updateActivityStatus');
       ipc.removeAllListeners('updateSaveStatus');
       ipc.removeAllListeners('updateMicStatus');
       ipc.removeAllListeners('updateErrorReport');
@@ -470,6 +481,8 @@ const WarcraftRecorder = () => {
                 savingStatus={savingStatus}
                 config={config}
                 updateAvailable={updateAvailable}
+                recorderCategory={activityStatus?.category}
+                activityStatus={activityStatus}
               />
               <Layout
                 recorderStatus={recorderStatus}

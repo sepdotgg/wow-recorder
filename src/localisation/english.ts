@@ -504,6 +504,11 @@ const ENGLISH: Translations = {
   [Phrase.SelectLanguage]: 'Select language',
   [Phrase.ChatDeleteMessageTooltip]: 'Delete this chat message',
   [Phrase.ReselectPipewireSourceButtonText]: 'Reselect Pipewire Source',
+  [Phrase.ValidateLogPathLabel]: 'Validate Log Paths',
+  [Phrase.ValidateLogPathsDescription]: 'Warcraft Recorder checks the log paths you set point to a supported WoW installation. You can disable this checking to allow you to set unsupported game modes. Disable this at your own risk.',
+  [Phrase.StartManualRecordingTooltip]: 'Start a manual recording.',
+  [Phrase.StopManualRecordingTooltip]: 'Stop the current manual recording.',
+  [Phrase.RecordedAt]: 'Recorded at',
 };
 
 export default ENGLISH;

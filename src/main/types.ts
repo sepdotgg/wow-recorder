@@ -26,6 +26,11 @@ enum RecStatus {
   Reconfiguring,
 }
 
+type ActivityStatus = {
+  category: VideoCategory;
+  start: number;
+};
+
 enum MicStatus {
   NONE,
   MUTED,
@@ -206,6 +211,7 @@ type Metadata = {
   delete?: boolean; // signals video should be deleted when possible
   uniqueHash?: string; // used for cloud video grouping
   bossPercent?: number;
+  appVersion?: string;
 };
 
 /**
@@ -391,6 +397,7 @@ type BaseConfig = {
   eraLogPath: string;
   recordRetailPtr: boolean;
   retailPtrLogPath: string;
+  validateLogPaths: boolean;
 };
 
 type ObsVideoConfig = {
@@ -702,4 +709,5 @@ export {
   SoundAlerts,
   CloudState,
   ObsOrderMovement,
+  ActivityStatus,
 };

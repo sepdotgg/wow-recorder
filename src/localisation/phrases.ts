@@ -503,6 +503,11 @@ enum Phrase {
   SelectLanguage,
   ChatDeleteMessageTooltip,
   ReselectPipewireSourceButtonText,
+  ValidateLogPathLabel,
+  ValidateLogPathsDescription,
+  StartManualRecordingTooltip,
+  StopManualRecordingTooltip,
+  RecordedAt,
 }
 
 enum Language {

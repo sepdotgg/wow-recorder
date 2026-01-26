@@ -501,6 +501,11 @@ const GERMAN: Translations = {
   [Phrase.SelectOptions]: 'Optionen wählen',
   [Phrase.SelectLanguage]: 'Sprache wählen',
   [Phrase.ChatDeleteMessageTooltip]: 'Diese Chat-Nachricht löschen',
+  [Phrase.ValidateLogPathLabel]: 'Logpfade überprüfen',
+  [Phrase.ValidateLogPathsDescription]: 'Warcraft Recorder überprüft, ob die von Ihnen festgelegten Logpfade auf eine unterstützte WoW-Installation verweisen. Sie können diese Überprüfung deaktivieren, um nicht unterstützte Spielmodi festzulegen. Deaktivieren Sie dies auf eigenes Risiko.',
+  [Phrase.StartManualRecordingTooltip]: 'Starte eine manuelle Aufnahme',
+  [Phrase.StopManualRecordingTooltip]: 'Beende die manuelle Aufnahme',
+  [Phrase.RecordedAt]: 'Aufgenommen am',
 };
 
 export default GERMAN;

@@ -8,6 +8,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 ### Added
 ### Fixed
+- Validate log path shows false by default when it's meant to show true.
+
+## [7.5.1] - 2026-01-21
+### Fixed
+- Update the parsing of COMBATANT_INFO events which changed in Midnight prepatch.
+
+## [7.5.0] - 2026-01-18
+### Added
+- A switch to disable strict log path validation.
+- Manual recording start/stop buttons on the side menu as an alternative to hotkeys.
+- [Issue 788](https://github.com/aza547/wow-recorder/issues/788) - Added the app version to the video metadata and an indicator in the frontend.
+- [Issue 754](https://github.com/aza547/wow-recorder/issues/754) - Add a timer for the currently recording activity.
+
+### Fixed
+- [Issue 789](https://github.com/aza547/wow-recorder/issues/789) - Fixes a bug where manual recordings could be interrupted by combat log events.
+- Fix a regression where the force stop button did nothing.
 
 ## [7.4.0] - 2026-01-08
 ### Added
