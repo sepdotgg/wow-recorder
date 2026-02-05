@@ -1,8 +1,6 @@
 /**
  * Platform-specific OBS audio source type mappings.
- * This file should only be imported in main process code.
  */
-// TODO: [linux-port] platform mappings to underlying source type
 import { AudioSourceType } from './types';
 
 // Platform audio source type mapping
@@ -26,4 +24,3 @@ const AudioSourceOBSType: Record<AudioSourceType, string> =
 export function getOBSAudioSourceType(type: AudioSourceType): string {
   return AudioSourceOBSType[type];
 }
-// TODO: [linux-port] END

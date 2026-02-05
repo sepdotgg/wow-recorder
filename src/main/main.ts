@@ -410,14 +410,12 @@ ipcMain.handle('getAllDisplays', (): OurDisplayType[] => {
   return getAvailableDisplays();
 });
 
-// TODO: [linux-port] add getPlatform handler (synchronous)
 /**
- * Get the current platform (synchronous).
+ * Get the current platform and make it available to the renderer.
  */
 ipcMain.on('getPlatform', (event) => {
   event.returnValue = process.platform;
 });
-// TODO: [linux-port] END
 
 const refreshCloudGuilds = async () => {
   console.info('[Main] Frontend triggered cloud guilds refresh');

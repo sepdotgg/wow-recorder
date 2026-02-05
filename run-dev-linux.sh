@@ -3,7 +3,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
-NOOBS_BIN="$SCRIPT_DIR/release/app/node_modules/noobs/dist/bin"
+NOOBS_BIN="$SCRIPT_DIR/release/app/node_modules/noobs/dist/bin/linux"
 BIN_PATH=PATH="$NOOBS_BIN:$PATH"
 
 # setup LD_LIBRARY_PATH to point to noobs for self-resolution

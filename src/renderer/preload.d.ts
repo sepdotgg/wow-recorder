@@ -76,13 +76,9 @@ declare global {
         reconfigureCloud(): void;
 
         getSensibleEncoderDefault(): Promise<string>;
-        // TODO: [linux-port] add getPlatform to type defs (synchronous)
         getPlatform(): NodeJS.Platform;
-        // TODO: [linux-port] END
         refreshCloudGuilds(): void;
-        // TODO: [linux-port] add reselectPipewireSource to type defs
         reselectPipewireSource(): void;
-        // TODO: [linux-port] END
         getOrCreateChatCorrelator(video: RendererVideo): Promise<string>;
         getChatMessages(correlator: string): Promise<TChatMessageWithId[]>;
         postChatMessage(correlator: string, message: string): void;

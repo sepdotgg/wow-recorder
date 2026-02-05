@@ -1073,15 +1073,12 @@ const getAudioSourceChoices = async (src: AudioSource) => {
   const ipc = window.electron.ipcRenderer;
   const properties = await ipc.getAudioSourceProperties(src.id);
 
-  // TODO: [linux-port] display TargetName in addition to window
   let devices;
   if (src.type === AudioSourceType.PROCESS) {
     devices = properties.find((prop) => prop.name === 'window' || prop.name === 'TargetName');
   } else {
     devices = properties.find((prop) => prop.name === 'device_id');
-  }
-  // TODO: [linux-port] END
-  console.log("----> Devices from audio source", devices);
+  };
 
   if (!devices || devices.type !== 'list') {
     return [];
