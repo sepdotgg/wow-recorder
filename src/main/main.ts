@@ -35,6 +35,7 @@ import DiskClient from 'storage/DiskClient';
 import Poller from 'utils/Poller';
 import Recorder from './Recorder';
 import AsyncQueue from 'utils/AsyncQueue';
+import { isLinux } from './platform';
 
 const logDir = setupApplicationLogging();
 const appVersion = app.getVersion();
@@ -355,7 +356,7 @@ ipcMain.handle('selectImage', async () => {
 
   const result = await dialog.showOpenDialog(window, {
     properties: ['openFile'],
-    filters: [{ name: 'Images', extensions: ['gif', 'png', 'jpg'] }],
+    filters: [{ name: 'Images', extensions: ['gif', 'png', ...(isLinux ? ['jpg'] : [])] }],
   });
 
   if (result.canceled) {

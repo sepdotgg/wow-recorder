@@ -532,11 +532,6 @@ export default class Recorder extends EventEmitter {
    * user to have setup their config for, which is why it's split out.
    */
   public async configureBase(config: BaseConfig, startup: boolean) {
-    // TODO: noobs disabled for Linux port
-    // if (!this.obsInitialized) {
-    //   console.warn('/////// TODO [Recorder] configureBase skipped (OBS not initialized)');
-    //   return;
-    // }
 
     const { obsFPS, obsRecEncoder, obsQuality, obsOutputResolution, obsPath } =
       config;
@@ -1178,11 +1173,11 @@ export default class Recorder extends EventEmitter {
     console.info('[Recorder] Log path', logPath);
 
     // TODO: Check if this is still needed with afterpack
-    if (isLinux) { // force electron's PATH
-      const noobsBinPath = path.join(__dirname, '../../node_modules/noobs/dist/bin/linux');
-      console.info('[Recorder] Setting  Noobs bin path', noobsBinPath);
-      process.env.PATH = `${noobsBinPath}:${process.env.PATH}`;
-    }
+    // if (isLinux) { // force electron's PATH
+    //   const noobsBinPath = path.join(__dirname, '../../node_modules/noobs/dist/bin/linux');
+    //   console.info('[Recorder] Setting  Noobs bin path', noobsBinPath);
+    //   process.env.PATH = `${noobsBinPath}:${process.env.PATH}`;
+    // }
     
     noobs.Init(noobsPath, logPath, cb);
     console.log('noobs.Init completed successfully'); 
@@ -1502,12 +1497,6 @@ export default class Recorder extends EventEmitter {
    * Configure the chat overlay image source.
    */
   public async configureOverlayImageSource(config: ObsOverlayConfig) {
-    // TODO: noobs disabled for Linux port
-    if (!this.obsInitialized) {
-      console.warn('/////// TODO [Recorder] configureOverlayImageSource skipped (OBS not initialized)');
-      return;
-    }
-
     const { chatOverlayEnabled } = config;
     console.info('[Recorder] Configure image source for chat overlay');
 
