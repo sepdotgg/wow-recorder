@@ -326,6 +326,8 @@ export default class Recorder extends EventEmitter {
         if (isLinux && type === AudioSourceType.PROCESS) {
           const settings = noobs.GetSourceSettings(name);
           settings['CaptureMode'] = 0; // CAPTURE_MODE_SINGLE
+          // No, 'Priorty' is not a typo, here...
+          // https://github.com/dimtpap/obs-pipewire-audio-capture/blob/2eb74267393f352256bb97295facf4c62870ff45/src/pipewire-audio-capture-app.c#L72
           settings['MatchPriorty'] = 1; // MATCH_PRIORITY_APP_NAME
           noobs.SetSourceSettings(name, settings);
         }
@@ -369,6 +371,8 @@ export default class Recorder extends EventEmitter {
       if (isLinux) {
         settings['TargetName'] = value;
         settings['CaptureMode'] = 0; // CAPTURE_MODE_SINGLE
+        // No, 'Priorty' is not a typo, here...
+        // https://github.com/dimtpap/obs-pipewire-audio-capture/blob/2eb74267393f352256bb97295facf4c62870ff45/src/pipewire-audio-capture-app.c#L72
         settings['MatchPriorty'] = 1; // MATCH_PRIORITY_APP_NAME
       } else {
         settings['window'] = value;
@@ -794,10 +798,10 @@ export default class Recorder extends EventEmitter {
       if (src.type === AudioSourceType.PROCESS && src.device) {
         if (isLinux) {
           settings['TargetName'] = src.device;
-          settings['priority'] = 2; // Executable matching
         } else {
           settings['window'] = src.device;
         }
+        settings['priority'] = 2; // Executable matching
         noobs.SetSourceSettings(name, settings);
       } else if (src.type !== AudioSourceType.PROCESS) {
         const properties = noobs.GetSourceProperties(name);
@@ -1171,13 +1175,6 @@ export default class Recorder extends EventEmitter {
 
     console.info('[Recorder] Noobs path:', noobsPath);
     console.info('[Recorder] Log path', logPath);
-
-    // TODO: Check if this is still needed with afterpack
-    // if (isLinux) { // force electron's PATH
-    //   const noobsBinPath = path.join(__dirname, '../../node_modules/noobs/dist/bin/linux');
-    //   console.info('[Recorder] Setting  Noobs bin path', noobsBinPath);
-    //   process.env.PATH = `${noobsBinPath}:${process.env.PATH}`;
-    // }
     
     noobs.Init(noobsPath, logPath, cb);
     console.log('noobs.Init completed successfully'); 

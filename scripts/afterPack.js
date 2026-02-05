@@ -25,9 +25,9 @@ NOOBS_BIN="$SCRIPT_DIR/resources/app.asar.unpacked/node_modules/noobs/dist/bin/l
 export LD_LIBRARY_PATH="$NOOBS_BIN:$LD_LIBRARY_PATH"
 export PATH="$NOOBS_BIN:$PATH"
 
-# Force avcocdec for aac_encode
+# Force avcodec for aac_encode
 AVCODEC_PATH="$NOOBS_BIN/libavcodec.so.62"
-# Force our libobs to load after that, to resolve its des
+# Force our libobs to load after that
 LIBOBS_PATH="$NOOBS_BIN/libobs.so.30"
 # Force x264 without memalign/huge pages
 LIBX264_PATH="$NOOBS_BIN/libx264.so.165"
