@@ -798,10 +798,15 @@ export default class Recorder extends EventEmitter {
       if (src.type === AudioSourceType.PROCESS && src.device) {
         if (isLinux) {
           settings['TargetName'] = src.device;
+          settings['CaptureMode'] = 0; // CAPTURE_MODE_SINGLE
+          // No, 'Priorty' is not a typo, here...
+          // https://github.com/dimtpap/obs-pipewire-audio-capture/blob/2eb74267393f352256bb97295facf4c62870ff45/src/pipewire-audio-capture-app.c#L72
+          settings['MatchPriorty'] = 1; // MATCH_PRIORITY_APP_NAME
         } else {
           settings['window'] = src.device;
+          settings['priority'] = 2; // Executable matching
         }
-        settings['priority'] = 2; // Executable matching
+        
         noobs.SetSourceSettings(name, settings);
       } else if (src.type !== AudioSourceType.PROCESS) {
         const properties = noobs.GetSourceProperties(name);

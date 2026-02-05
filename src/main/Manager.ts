@@ -40,7 +40,6 @@ import LogHandler from 'parsing/LogHandler';
 import { PTTKeyPressEvent } from 'types/KeyTypesUIOHook';
 import { send } from './main';
 import DiskClient from 'storage/DiskClient';
-import Activity from 'activitys/Activity';
 import { isLinux } from './platform';
 
 /**
