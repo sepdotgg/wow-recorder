@@ -15,18 +15,38 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout noobs
+      uses: actions/checkout@v4
+      with:
+        repository: sepdotgg/noobs
+        ref: linux-pr-wip
+        path: noobs
+
+    - name: Checkout wow-recorder
+      uses: actions/checkout@v4
+      with:
+        path: wow-recorder
+
     - name: Setup Node JS
       uses: actions/setup-node@v4
       with:
         node-version: '22.12.0'
         cache: 'npm'
+        cache-dependency-path: wow-recorder/package-lock.json
+
+    - name: Build noobs
+      working-directory: noobs
+      run: |
+        npm install
+        npm run build
 
     - name: Install deps
+      working-directory: wow-recorder
       run: npm install
 
     # https://github.com/aza547/wow-recorder/issues/737
     # - name: Run unit tests
+    #   working-directory: wow-recorder
     #   run: npm test
 
   build-linux:
@@ -48,7 +68,7 @@ jobs:
     - name: Setup Node JS
       uses: actions/setup-node@v4
       with:
-        node-version: '22'
+        node-version: '22.12.0'
         cache: 'npm'
         cache-dependency-path: wow-recorder/package-lock.json
 
