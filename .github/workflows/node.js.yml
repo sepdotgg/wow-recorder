@@ -44,6 +44,10 @@ jobs:
       working-directory: wow-recorder
       run: npm install
 
+    - name: Build
+      working-directory: wow-recorder
+      run: npm run build
+
     # https://github.com/aza547/wow-recorder/issues/737
     # - name: Run unit tests
     #   working-directory: wow-recorder
