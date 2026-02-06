@@ -98,3 +98,8 @@ jobs:
           wow-recorder/release/build/*.AppImage
           wow-recorder/release/build/latest-linux.yml
         retention-days: 30
+
+    - name: Get public download link
+      run: |
+        echo "Public download link:"
+        echo "https://nightly.link/${{ github.repository }}/actions/runs/${{ github.run_id }}/linux-appimage.zip"
