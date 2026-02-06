@@ -503,7 +503,7 @@ const AudioSourceControls = (props: IProps) => {
       const found = choices.find((tt) => tt.value === src.device);
 
       const items = choices.map((tt) => (
-        <SelectItem key={tt.name} value={String(tt.value || ' ')}>
+        <SelectItem key={tt.name} value={String(tt.value)}>
           {tt.name}
         </SelectItem>
       ));

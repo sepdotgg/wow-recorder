@@ -1084,7 +1084,9 @@ const getAudioSourceChoices = async (src: AudioSource) => {
     return [];
   }
 
-  return devices.items;
+  // [linux] pipewire audio sources can sometimes return empty names.
+  // filter out anything falsy -- we wouldn't want to capture any of those anyway
+  return devices.items.filter(item => item.value);
 };
 
 const getKeyPressEventString = (

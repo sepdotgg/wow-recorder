@@ -35,7 +35,7 @@ import DiskClient from 'storage/DiskClient';
 import Poller from 'utils/Poller';
 import Recorder from './Recorder';
 import AsyncQueue from 'utils/AsyncQueue';
-import { isLinux } from './platform';
+import { ensureAutostartPath, isLinux } from './platform';
 
 const logDir = setupApplicationLogging();
 const appVersion = app.getVersion();
@@ -194,6 +194,9 @@ const createWindow = async () => {
   // We need to do this AFTER creating the window as it's used by the preview.
   Recorder.getInstance().initializeObs();
   await manager.startup();
+
+  // [linux] ensure autostart points to the current appimage
+  ensureAutostartPath(cfg.get<boolean>('startUp'));
 
   if (firstTimeSetup) {
     console.info('[Main] Run first time setup actions');
