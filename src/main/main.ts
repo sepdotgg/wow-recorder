@@ -222,8 +222,12 @@ const createWindow = async () => {
     console.info('[Main] Ready to show');
 
     const status = app.getGPUFeatureStatus();
-    const info = await app.getGPUInfo('complete');
-    console.info('[Main] GPU info', { status, info });
+    try {
+      const info = await app.getGPUInfo('complete');
+      console.info('[Main] GPU info', { status, info });
+    } catch (error) {
+      console.warn('[Main] GPU info unavailable', { status, error });
+    }
 
     if (!window) {
       throw new Error('window is not defined');

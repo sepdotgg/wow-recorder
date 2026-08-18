@@ -30,7 +30,9 @@ export default class AppUpdater {
       autoUpdater.quitAndInstall();
     });
 
-    this.periodicallyCheckUpdate();
+    if (process.platform !== 'linux') {
+      this.periodicallyCheckUpdate();
+    }
   }
 
   private periodicallyCheckUpdate() {
